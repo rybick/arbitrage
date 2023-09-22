@@ -1,17 +1,57 @@
-class ArbitrageFinder(val exchangeRates: Array<DoubleArray>) {
+class ArbitrageFinder(val exchangeRates: Array<DoubleArray>, val legend: Array<String>) {
+    val visited = Array(exchangeRates.size) { false }
+    var startVertex = 0
+    val path: ArrayDeque<Int> = ArrayDeque(exchangeRates.size)
+    var found = false
+
     fun findArbitrage(): Arbitrage? {
-//        val ratesByFromVertex: Map<Currency, ExchangeRate> =
-//            exchangeRates.associateBy { it.exchange.from }
+        while (startVertex < exchangeRates.size) {
+            val value = depthFirst(startVertex, 1.0)
+            if (found) {
+                return Arbitrage(value, path + startVertex, legend)
+            }
+            ++startVertex
+        }
         return null
     }
 
-    fun depthFirst(current: ExchangeRate, ratesByFromVertex: Map<Currency, ExchangeRate>) {
+    fun depthFirst(currentVertex: Int, value: Double): Double {
+        if (currentVertex == startVertex && path.size > 1) {
+            if (value > 1.0) {
+                found = true
+            }
+            return value
+        }
+        visit(currentVertex)
+        for (vertex in 0 until visited.size) {
+            if (!visited[vertex] || (vertex == startVertex && currentVertex != startVertex)) {
+                val newValue = depthFirst(vertex, value * exchangeRates[currentVertex][vertex])
+                if (found) {
+                    return newValue
+                }
+            }
+        }
+        leave(currentVertex)
+        return value
+    }
 
+    fun visit(vertex: Int) {
+        visited[vertex] = true
+        path.addLast(vertex)
+    }
+
+    fun leave(vertex: Int) {
+        visited[vertex] = false
+        path.removeLast()
     }
 }
 
-data class Arbitrage(val exchanges: List<Exchange>) {
-    constructor(vararg exchanges: Exchange) : this(exchanges.toList())
+class Arbitrage(val value: Double, val path: List<Int>, val legend: Array<String>) {
+
+    override fun toString(): String {
+        return "Arbitrage(value=$value, path=${path.map { legend[it] }})"
+    }
+
 }
 
 data class Exchange(val from: Currency, val to: Currency)

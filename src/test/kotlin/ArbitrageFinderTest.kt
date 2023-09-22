@@ -1,12 +1,12 @@
 import assertk.assertThat
-import assertk.assertions.hasSize
-import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import kotlin.test.Test
 
 internal class ArbitrageFinderTest {
     private val XXX = 2.0 // invalid value
+
+    private val legend = arrayOf("EUR", "USD", "PLN", "GBP")
 
     @Test
     fun `only 0-profit input`() {
@@ -20,7 +20,7 @@ internal class ArbitrageFinderTest {
             )
 
         // when
-        val arbitrage = ArbitrageFinder(exchangeRates).findArbitrage()
+        val arbitrage = ArbitrageFinder(exchangeRates, legend).findArbitrage()
 
         // then
         assertThat(arbitrage).isNull()
@@ -38,7 +38,7 @@ internal class ArbitrageFinderTest {
             )
 
         // when
-        val arbitrage = ArbitrageFinder(exchangeRates).findArbitrage()
+        val arbitrage = ArbitrageFinder(exchangeRates, legend).findArbitrage()
 
         // then
         assertThat(arbitrage).isNull()
@@ -57,41 +57,64 @@ internal class ArbitrageFinderTest {
             )
 
         // when
-        val arbitrage = ArbitrageFinder(exchangeRates).findArbitrage()
+        val arbitrage = ArbitrageFinder(exchangeRates, legend).findArbitrage()
 
         // then
         assertThat(arbitrage).isNotNull()
     }
 
-//    @Test
-//    fun `simple cycle (positive)`() {
-//        // given
-//        val exchangeRates: List<ExchangeRate> = listOf(
-//            EUR to PLN to 4.00,
-//            PLN to GBP to 1.00,
-//            GBP to USD to 1.25,
-//            USD to EUR to 1.00,
-//            EUR to CHF to 0.75,
-//        ).map(ExchangeRate::from)
-//
-//        // when
-//        val arbitrage = ArbitrageFinder(exchangeRates).findArbitrage()
-//
-//        // then
-//        assertThat(arbitrage)
-//            .isNotNull()
-//            .transform { it.exchanges }
-//            .hasSize(4)
-//    }
+    @Test
+    fun `positive profit EUR to USD and back`() {
+        // given
+        val exchangeRates: Array<DoubleArray> =
+            arrayOf( //        EUR, USD, PLN, GBP
+                doubleArrayOf( XXX, 1.07, 4.59, 0.87), // EUR
+                doubleArrayOf(0.94,  XXX, 4.31, 0.82), // USD
+                doubleArrayOf(0.22, 0.23,  XXX, 0.19), // PLN
+                doubleArrayOf(1.15, 1.22, 5.28,  XXX)  // GBP
+            )
 
+        // when
+        val arbitrage = ArbitrageFinder(exchangeRates, legend).findArbitrage()
 
-    fun `ddd`() {
-        val exchangeRates: List<ExchangeRate> = listOf(
-            USD to PLN to 3.8,
-            PLN to USD to 0.25,
-            PLN to EUR to 0.25,
-            EUR to PLN to 4.0
-        ).map(ExchangeRate::from)
+        // then
+        assertThat(arbitrage).isNotNull()
+    }
+
+    @Test
+    fun `positive profit EUR, USD, PLN, GBP, EUR`() {
+        // given
+        val exchangeRates: Array<DoubleArray> =
+            arrayOf( //        EUR, USD,   PLN,  GBP
+                doubleArrayOf( XXX, 1.07, 4.59, 0.87), // EUR
+                doubleArrayOf(0.93,  XXX, 4.31, 0.82), // USD
+                doubleArrayOf(0.21, 0.23,  XXX, 0.19), // PLN
+                doubleArrayOf(1.14, 1.22, 5.28,  XXX)  // GBP
+            )
+
+        // when
+        val arbitrage = ArbitrageFinder(exchangeRates, legend).findArbitrage()
+
+        // then
+        assertThat(arbitrage).isNotNull()
+    }
+
+    @Test
+    fun `profit USD, PLN, GBP, USD`() {
+        // given
+        val exchangeRates: Array<DoubleArray> =
+            arrayOf( //       EUR,   USD,  PLN,  GBP
+                doubleArrayOf( XXX, 1.00, 2.00, 1.00), // EUR
+                doubleArrayOf(0.80,  XXX, 2.00, 1.00), // USD
+                doubleArrayOf(0.45, 0.49,  XXX, 0.50), // PLN
+                doubleArrayOf(1.00, 1.10, 2.00,  XXX)  // GBP
+            )
+
+        // when
+        val arbitrage = ArbitrageFinder(exchangeRates, legend).findArbitrage()
+
+        // then
+        assertThat(arbitrage).isNotNull()
     }
 
     val USD = Currency("USD")
