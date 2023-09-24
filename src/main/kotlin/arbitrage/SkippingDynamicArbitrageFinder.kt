@@ -8,13 +8,17 @@ package arbitrage
  *  to get value for this point (exclude the part that is not part of the cycle).
  * If after closing the cycle, the multiplied value is > 1.0, that's the arbitrage.
  *
+ * This implementation skips some edges that are known to be bad, but does not guarantee a better
+ * complexity then regular dynamic one.
+ * also it doesn't work.
+ *
  * time: (n-1)! (so still not much better than brute force)
  * space with input: n^2
  * space without input: n (visitedDistanceInverses + stack)
  *
  * n - number of currencies
  */
-class DynamicArbitrageFinder(val exchangeRates: Array<DoubleArray>, val legend: Array<String>) {
+class SkippingDynamicArbitrageFinder(val exchangeRates: Array<DoubleArray>, val legend: Array<String>) {
     private val visitedDistanceInverses = Array(exchangeRates.size) { UNVISITED }
     private val startVertex = 0
     private val path: ArrayDeque<Int> = ArrayDeque(exchangeRates.size)
@@ -38,7 +42,7 @@ class DynamicArbitrageFinder(val exchangeRates: Array<DoubleArray>, val legend: 
         }
         visit(currentVertex, value)
         for (nextVertex in 0 until visitedDistanceInverses.size) {
-            if (nextVertex == currentVertex) {
+            if (nextVertex == currentVertex || pathNotWorthChecking(currentVertex, nextVertex)) {
                 continue
             }
             val iVertexValue = value * exchangeRates[currentVertex][nextVertex]
@@ -59,6 +63,9 @@ class DynamicArbitrageFinder(val exchangeRates: Array<DoubleArray>, val legend: 
         return value
     }
 
+    private fun pathNotWorthChecking(from: Int, to: Int): Boolean =
+        exchangeRates[from][to] <= exchangeRates[from][startVertex] * exchangeRates[startVertex][to]
+
     private fun visit(vertex: Int, value: Double) {
         visitedDistanceInverses[vertex] = 1.0 / value
         path.addLast(vertex)
@@ -76,8 +83,8 @@ class DynamicArbitrageFinder(val exchangeRates: Array<DoubleArray>, val legend: 
     }
 }
 
-class DynamicArbitrageFinderAdapter: ArbitrageFinder {
+class SkippingDynamicArbitrageFinderAdapter: ArbitrageFinder {
     override fun findArbitrage(exchangeRates: Array<DoubleArray>, legend: Array<String>): Arbitrage? =
-        DynamicArbitrageFinder(exchangeRates, legend).findArbitrage()
+        SkippingDynamicArbitrageFinder(exchangeRates, legend).findArbitrage()
 }
 
