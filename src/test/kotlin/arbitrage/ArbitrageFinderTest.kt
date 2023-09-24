@@ -5,7 +5,7 @@ import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import kotlin.test.Test
 
-internal class ArbitrageFinderTest {
+abstract class ArbitrageFinderTest {
     private val XXX = 2.0 // invalid exchange place holder
 
     private val legend = arrayOf("EUR", "USD", "PLN", "GBP")
@@ -119,5 +119,13 @@ internal class ArbitrageFinderTest {
         assertThat(arbitrage).isNotNull()
     }
 
-    fun subject(): ArbitrageFinder = BruteForceArbitrageFinderAdapter()
+    abstract fun subject(): ArbitrageFinder
+}
+
+class BruteForceArbitrageFinderTest : ArbitrageFinderTest() {
+    override fun subject(): ArbitrageFinder = BruteForceArbitrageFinderAdapter()
+}
+
+class DynamicArbitrageFinderTest : ArbitrageFinderTest() {
+    override fun subject(): ArbitrageFinder = DynamicArbitrageFinderAdapter()
 }
