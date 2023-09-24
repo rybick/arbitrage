@@ -9,9 +9,6 @@ import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import kotlin.test.Test
 
-// TODO understand why skipping one does not work
-// create approach with iterative improving of best path between two vertices
-
 abstract class ArbitrageFinderTest {
     private val XXX = 1.0 // invalid exchange place holder
 

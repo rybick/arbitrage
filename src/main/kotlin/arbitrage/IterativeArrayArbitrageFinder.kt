@@ -10,7 +10,7 @@ class IterativeArrayArbitrageFinder(private val exchangeRates: Array<DoubleArray
     }
 
     fun findArbitrage(): Arbitrage? {
-        for (iterationNumber in 0..(exchangeRates.size+1)) {
+        for (iterationNumber in 0 until exchangeRates.size) {
             with(doIteration()) {
                 if (arbitrage != null) {
                     return arbitrage
@@ -71,7 +71,7 @@ class IterativeArrayArbitrageFinder(private val exchangeRates: Array<DoubleArray
         private val anythingChanged: Boolean
     ) {
 
-        val nothingChanged get() = anythingChanged
+        val nothingChanged get() = !anythingChanged
 
         companion object {
             fun found(arbitrage: Arbitrage?) =
