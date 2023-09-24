@@ -119,7 +119,28 @@ abstract class ArbitrageFinderTest {
         assertThat(arbitrage).isNotNull()
     }
 
+    @Test
+    fun `a big matrix with slightly negative outcome`() {
+        // given
+        val currencyValues = IntRange(0, 12)
+        val exchangeRates: Array<DoubleArray> =
+            currencyValues.map { iVal ->
+                currencyValues.map { jVal ->
+                    0.999999 * iVal.toDouble() / jVal.toDouble()
+                }.toDoubleArray()
+            }.toTypedArray()
+        val legend = defaultLegend(currencyValues.count())
+
+        // when
+        val arbitrage = subject().findArbitrage(exchangeRates, legend)
+
+        // then
+        assertThat(arbitrage).isNull()
+    }
+
     abstract fun subject(): ArbitrageFinder
+
+    private fun defaultLegend(size: Int): Array<String> = (0..size).map { "C$it" }.toTypedArray()
 }
 
 class BruteForceArbitrageFinderTest : ArbitrageFinderTest() {

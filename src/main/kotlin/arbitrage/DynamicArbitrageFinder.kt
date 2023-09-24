@@ -9,7 +9,7 @@ package arbitrage
  * If after closing the cycle, the multiplied value is > 1.0, that's the arbitrage.
  * Repeats above for each possible starting point.
  *
- * time: (n-1)! (so not much better than brute force)
+ * time: (n-1)! (so still not much better than brute force)
  * space with input: n^2
  * space without input: n (visitedDistanceInverses + stack)
  *
