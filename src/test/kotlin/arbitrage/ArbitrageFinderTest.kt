@@ -6,7 +6,7 @@ import assertk.assertions.isNull
 import kotlin.test.Test
 
 internal class ArbitrageFinderTest {
-    private val XXX = 2.0 // invalid value
+    private val XXX = 2.0 // invalid exchange place holder
 
     private val legend = arrayOf("EUR", "USD", "PLN", "GBP")
 
@@ -22,7 +22,7 @@ internal class ArbitrageFinderTest {
             )
 
         // when
-        val arbitrage = ArbitrageFinder(exchangeRates, legend).findArbitrage()
+        val arbitrage = subject().findArbitrage(exchangeRates, legend)
 
         // then
         assertThat(arbitrage).isNull()
@@ -40,7 +40,7 @@ internal class ArbitrageFinderTest {
             )
 
         // when
-        val arbitrage = ArbitrageFinder(exchangeRates, legend).findArbitrage()
+        val arbitrage = subject().findArbitrage(exchangeRates, legend)
 
         // then
         assertThat(arbitrage).isNull()
@@ -59,7 +59,7 @@ internal class ArbitrageFinderTest {
             )
 
         // when
-        val arbitrage = ArbitrageFinder(exchangeRates, legend).findArbitrage()
+        val arbitrage = subject().findArbitrage(exchangeRates, legend)
 
         // then
         assertThat(arbitrage).isNotNull()
@@ -77,7 +77,7 @@ internal class ArbitrageFinderTest {
             )
 
         // when
-        val arbitrage = ArbitrageFinder(exchangeRates, legend).findArbitrage()
+        val arbitrage = subject().findArbitrage(exchangeRates, legend)
 
         // then
         assertThat(arbitrage).isNotNull()
@@ -95,7 +95,7 @@ internal class ArbitrageFinderTest {
             )
 
         // when
-        val arbitrage = ArbitrageFinder(exchangeRates, legend).findArbitrage()
+        val arbitrage = subject().findArbitrage(exchangeRates, legend)
 
         // then
         assertThat(arbitrage).isNotNull()
@@ -113,15 +113,11 @@ internal class ArbitrageFinderTest {
             )
 
         // when
-        val arbitrage = ArbitrageFinder(exchangeRates, legend).findArbitrage()
+        val arbitrage = subject().findArbitrage(exchangeRates, legend)
 
         // then
         assertThat(arbitrage).isNotNull()
     }
 
-    val USD = Currency("USD")
-    val EUR = Currency("EUR")
-    val PLN = Currency("PLN")
-    val GBP = Currency("GBP")
-    val CHF = Currency("CHF")
+    fun subject(): ArbitrageFinder = BruteForceArbitrageFinderAdapter()
 }
