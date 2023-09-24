@@ -1,6 +1,10 @@
 package arbitrage
 
+import assertk.Assert
+import assertk.all
 import assertk.assertThat
+import assertk.assertions.isBetween
+import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import kotlin.test.Test
@@ -9,8 +13,12 @@ import kotlin.test.Test
 // create approach with iterative improving of best path between two vertices
 
 abstract class ArbitrageFinderTest {
-    private val XXX = 2.0 // invalid exchange place holder
+    private val XXX = 1.0 // invalid exchange place holder
 
+    private val EUR = 0
+    private val USD = 1
+    private val PLN = 2
+    private val GBP = 3
     private val legend = arrayOf("EUR", "USD", "PLN", "GBP")
 
     @Test
@@ -91,17 +99,21 @@ abstract class ArbitrageFinderTest {
         // given
         val exchangeRates: Array<DoubleArray> =
             arrayOf( //        EUR, USD,   PLN,  GBP
-                doubleArrayOf( XXX, 1.07, 4.59, 0.87), // EUR
-                doubleArrayOf(0.93,  XXX, 4.31, 0.82), // USD
-                doubleArrayOf(0.21, 0.23,  XXX, 0.19), // PLN
-                doubleArrayOf(1.14, 1.22, 5.28,  XXX)  // GBP
+                doubleArrayOf( XXX, 1.07, 4.58, 0.82), // EUR
+                doubleArrayOf(0.92,  XXX, 4.31, 0.77), // USD
+                doubleArrayOf(0.20, 0.22,  XXX, 0.18), // PLN
+                doubleArrayOf(1.21, 1.20, 5.27,  XXX)  // GBP
             )
 
         // when
         val arbitrage = subject().findArbitrage(exchangeRates, legend)
 
         // then
-        assertThat(arbitrage).isNotNull()
+        assertThat(arbitrage).isNotNull().all {
+            transform { it.value }.isBetween(1.0044, 1.0045)
+            transform { it.path }.isSameArbitrageAs(EUR, USD, PLN, GBP, EUR)
+        }
+
     }
 
     @Test
@@ -146,12 +158,34 @@ abstract class ArbitrageFinderTest {
     private fun defaultLegend(size: Int): Array<String> = (0..size).map { "C$it" }.toTypedArray()
 }
 
+private fun Assert<List<Int>>.isSameArbitrageAs(vararg currenciesArray: Int) {
+    val currencies = currenciesArray.toList()
+    given {
+        assertThat(it.first()).isEqualTo(it.last())
+        assertThat(currencies.first()).isEqualTo(currencies.last())
+        assertThat(currencies.size).isEqualTo(it.size)
+        val size = it.size - 1
+        val original = it.subList(0, size)
+        val expected = currencies.subList(0, size)
+        val startValueInExpected = expected[0]
+        val startIndexInOriginal = original.indexOf(startValueInExpected)
+        for (i in 0 until size) {
+            val originalIndex = (startIndexInOriginal + i) % size
+            assertThat(original[originalIndex]).isEqualTo(expected[i])
+        }
+    }
+}
+
 class BruteForceArbitrageFinderTest : ArbitrageFinderTest() {
     override fun subject(): ArbitrageFinder = BruteForceArbitrageFinderAdapter()
 }
 
 class DynamicArbitrageFinderTest : ArbitrageFinderTest() {
     override fun subject(): ArbitrageFinder = DynamicArbitrageFinderAdapter()
+}
+
+class IterativeArrayArbitrageFinderTest : ArbitrageFinderTest() {
+    override fun subject(): ArbitrageFinder = IterativeArrayArbitrageFinderAdapter()
 }
 
 //class SkippingDynamicArbitrageFinderTest : ArbitrageFinderTest() {

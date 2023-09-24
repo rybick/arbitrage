@@ -41,17 +41,17 @@ class DynamicArbitrageFinder(val exchangeRates: Array<DoubleArray>, val legend: 
             if (nextVertex == currentVertex) {
                 continue
             }
-            val iVertexValue = value * exchangeRates[currentVertex][nextVertex]
+            val nextVertexValue = value * exchangeRates[currentVertex][nextVertex]
             if (isUnvisited(nextVertex)) {
-                val newValue = depthFirst(nextVertex, iVertexValue)
+                val newValue = depthFirst(nextVertex, nextVertexValue)
                 if (found) {
                     return newValue
                 }
             } else {
-                val newValue = iVertexValue * visitedDistanceInverses[nextVertex]
+                val newValue = nextVertexValue * visitedDistanceInverses[nextVertex]
                 if (newValue > 1.0) {
                     found = true
-                    return value
+                    return newValue
                 }
             }
         }
