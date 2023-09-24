@@ -1,3 +1,5 @@
+package arbitrage
+
 class ArbitrageFinder(val exchangeRates: Array<DoubleArray>, val legend: Array<String>) {
     val visited = Array(exchangeRates.size) { false }
     var startVertex = 0
@@ -49,7 +51,7 @@ class ArbitrageFinder(val exchangeRates: Array<DoubleArray>, val legend: Array<S
 class Arbitrage(val value: Double, val path: List<Int>, val legend: Array<String>) {
 
     override fun toString(): String {
-        return "Arbitrage(value=$value, path=${path.map { legend[it] }})"
+        return "arbitrage.Arbitrage(value=$value, path=${path.map { legend[it] }})"
     }
 
 }

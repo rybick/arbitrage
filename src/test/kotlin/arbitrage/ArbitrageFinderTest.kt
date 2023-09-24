@@ -1,3 +1,5 @@
+package arbitrage
+
 import assertk.assertThat
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
