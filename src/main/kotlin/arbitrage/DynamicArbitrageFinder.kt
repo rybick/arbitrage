@@ -1,10 +1,25 @@
 package arbitrage
 
+/**
+ * Performs depth 1-st search looking for all cycles ending at ANY point.
+ * Multiplies all edge weights on the way (exchange rate).
+ * Stores inbverse of multiplied values in an array for each vertex.
+ * If the ending point of the cycle is not starting point than multiplies it with the stored inverse for end point
+ *  to get value for this point (exclude the part that is not part of the cycle).
+ * If after closing the cycle, the multiplied value is > 1.0, that's the arbitrage.
+ * Repeats above for each possible starting point.
+ *
+ * time: (n-1)! (so not much better than brute force)
+ * space with input: n^2
+ * space without input: n (visitedDistanceInverses + stack)
+ *
+ * n - number of currencies
+ */
 class DynamicArbitrageFinder(val exchangeRates: Array<DoubleArray>, val legend: Array<String>) {
-    val visitedDistanceInverses = Array(exchangeRates.size) { UNVISITED }
-    val startVertex = 0
-    val path: ArrayDeque<Int> = ArrayDeque(exchangeRates.size)
-    var found = false
+    private val visitedDistanceInverses = Array(exchangeRates.size) { UNVISITED }
+    private val startVertex = 0
+    private val path: ArrayDeque<Int> = ArrayDeque(exchangeRates.size)
+    private var found = false
 
     fun findArbitrage(): Arbitrage? {
         val value = depthFirst(startVertex, 1.0)
