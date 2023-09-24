@@ -10,11 +10,12 @@ import java.lang.RuntimeException
  * and bestPaths array is updated to include the information that exchange should be done via this vertex (currency).
  * the steps above are run for each possible throughVertex value.
  *
- * Then the steps are repeated up to vertex number times until no changes in the array are made
- * or when we find an exchange from A to A (the same currency) that has exchange rate bigger than 1.0.
+ * [striketrhough]Then the steps are repeated up to vertex number times until no changes in the array are made
+ * or when we find an exchange from A to A (the same currency) that has exchange rate bigger than 1.0.[/striketrhough]
+ * That was the 1st idea. Looks like it's enough to do one iteration.
  *
  *
- * Time complexity: n^4 = m^2
+ * Time complexity: n^3 = m*log(m)
  * Space complexity: n^3 = m*log(m)
  *
  * n - number of currencies (vertices)
@@ -28,19 +29,7 @@ class IterativeArrayArbitrageFinder(private val exchangeRates: Array<DoubleArray
     }
 
     fun findArbitrage(): Arbitrage? {
-        for (iterationNumber in 0 until exchangeRates.size) {
-            with(doIteration()) {
-                if (arbitrage != null) {
-                    return arbitrage
-                }
-                if (nothingChanged) {
-                    return null // terminate sooner
-                }
-            }
-        }
-        throw RuntimeException("I think we are guaranteed to either find solution " +
-                "or find there is no solution in n iterations. " +
-                "Prove me wrong")
+        return doIteration().arbitrage
     }
 
     fun doIteration(): IterationResult {
