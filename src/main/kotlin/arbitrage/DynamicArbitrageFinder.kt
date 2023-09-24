@@ -8,9 +8,9 @@ package arbitrage
  *  to get value for this point (exclude the part that is not part of the cycle).
  * If after closing the cycle, the multiplied value is > 1.0, that's the arbitrage.
  *
- * time: (n-1)! (so still not much better than brute force)
- * space with input: n^2
- * space without input: n (visitedDistanceInverses + stack)
+ * time complexity: (n-1)! (so still not much better than brute force)
+ * space complexity (with input): n^2
+ * space complexity (without input): n (visitedDistanceInverses + stack)
  *
  * n - number of currencies
  */

@@ -6,9 +6,9 @@ package arbitrage
  * If after closing the cycle, the multiplied value is > 1.0, that's the arbitrage.
  * Repeats above for each possible starting point.
  *
- * time: n!
- * space with input: n^2
- * space without input: n (visited + stack)
+ * time complexity: n!
+ * space complexity (with input): n^2
+ * space complexity (without input): n (visited + stack)
  *
  * n - number of currencies
  */

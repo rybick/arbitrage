@@ -2,6 +2,24 @@ package arbitrage
 
 import java.lang.RuntimeException
 
+/**
+ * Finds the best (best value) paths for each pair of vertices.
+ * In first iteration for each edge (exchange) checks if it more value can be received via doing
+ * the exchange via throughVertex currency rather than directly.
+ * If so exchange rate that utilizes throughVertex is saved as a better one in place of the direct one
+ * and bestPaths array is updated to include the information that exchange should be done via this vertex (currency).
+ * the steps above are run for each possible throughVertex value.
+ *
+ * Then the steps are repeated up to vertex number times until no changes in the array are made
+ * or when we find an exchange from A to A (the same currency) that has exchange rate bigger than 1.0.
+ *
+ *
+ * Time complexity: n^4 = m^2
+ * Space complexity: n^3 = m*log(m)
+ *
+ * n - number of currencies (vertices)
+ * m - number of possible direct exchanges (edges)
+ */
 class IterativeArrayArbitrageFinder(private val exchangeRates: Array<DoubleArray>, private val legend: Array<String>) {
     private val bestPaths: Array<Array<MutableList<Int>>> = Array(exchangeRates.size) {
         Array(exchangeRates.size) {
@@ -36,17 +54,10 @@ class IterativeArrayArbitrageFinder(private val exchangeRates: Array<DoubleArray
                     if (directRate < rateThrough) {
                         exchangeRates[fromVertex][toVertex] = rateThrough
                         with(bestPaths[fromVertex][toVertex]) {
-                            val before = bestPaths[fromVertex][toVertex].toMutableList()
-                            val p1 = bestPaths[fromVertex][throughVertex]
-                            val p2 = throughVertex
-                            val p3 = bestPaths[throughVertex][toVertex]
                             clear()
                             addAll(bestPaths[fromVertex][throughVertex])
                             add(throughVertex)
                             addAll(bestPaths[throughVertex][toVertex])
-                            if (size >= 2 && this[0] == 0 && this[1] == 0) {
-                                println("ddd")
-                            }
                         }
                         anythingChanged = true
                     }

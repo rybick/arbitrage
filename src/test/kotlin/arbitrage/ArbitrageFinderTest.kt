@@ -131,7 +131,7 @@ abstract class ArbitrageFinderTest {
         assertThat(arbitrage).isNotNull()
     }
 
-    //@Test
+    //@Test run a couple of seconds for dynamic and minutes for brute force
     fun `a big matrix with slightly negative outcome`() {
         // given
         val currencyValues = IntRange(0, 12)
@@ -152,7 +152,7 @@ abstract class ArbitrageFinderTest {
 
     abstract fun subject(): ArbitrageFinder
 
-    private fun defaultLegend(size: Int): Array<String> = (0..size).map { "C$it" }.toTypedArray()
+    protected fun defaultLegend(size: Int): Array<String> = (0..size).map { "C$it" }.toTypedArray()
 }
 
 private fun Assert<List<Int>>.isSameArbitrageAs(vararg currenciesArray: Int) {
@@ -183,6 +183,27 @@ class DynamicArbitrageFinderTest : ArbitrageFinderTest() {
 
 class IterativeArrayArbitrageFinderTest : ArbitrageFinderTest() {
     override fun subject(): ArbitrageFinder = IterativeArrayArbitrageFinderAdapter()
+
+    @Test
+    // takes less than 100ms for 300 currencies,
+    // while brute force and dynamic ones take too long for 12 currencies
+    fun `a REALLY big matrix with slightly negative outcome`() {
+        // given
+        val currencyValues = IntRange(0, 300)
+        val exchangeRates: Array<DoubleArray> =
+            currencyValues.map { iVal ->
+                currencyValues.map { jVal ->
+                    0.999999 * iVal.toDouble() / jVal.toDouble()
+                }.toDoubleArray()
+            }.toTypedArray()
+        val legend = defaultLegend(currencyValues.count())
+
+        // when
+        val arbitrage = subject().findArbitrage(exchangeRates, legend)
+
+        // then
+        assertThat(arbitrage).isNull()
+    }
 }
 
 //class SkippingDynamicArbitrageFinderTest : ArbitrageFinderTest() {
