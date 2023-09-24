@@ -1,20 +1,18 @@
 package arbitrage
 
 class DynamicArbitrageFinder(val exchangeRates: Array<DoubleArray>, val legend: Array<String>) {
-    val visited = Array(exchangeRates.size) { false }
-    var startVertex = 0
+    val visitedDistanceInverses = Array(exchangeRates.size) { UNVISITED }
+    val startVertex = 0
     val path: ArrayDeque<Int> = ArrayDeque(exchangeRates.size)
     var found = false
 
     fun findArbitrage(): Arbitrage? {
-        while (startVertex < exchangeRates.size) {
-            val value = depthFirst(startVertex, 1.0)
-            if (found) {
-                return Arbitrage(value, path + startVertex, legend)
-            }
-            ++startVertex
+        val value = depthFirst(startVertex, 1.0)
+        return if (found) {
+            Arbitrage(value, path + startVertex, legend)
+        } else {
+            null
         }
-        return null
     }
 
     fun depthFirst(currentVertex: Int, value: Double): Double {
@@ -24,12 +22,22 @@ class DynamicArbitrageFinder(val exchangeRates: Array<DoubleArray>, val legend: 
             }
             return value
         }
-        visit(currentVertex)
-        for (vertex in 0 until visited.size) {
-            if (!visited[vertex] || (vertex == startVertex && currentVertex != startVertex)) {
-                val newValue = depthFirst(vertex, value * exchangeRates[currentVertex][vertex])
+        visit(currentVertex, value)
+        for (iVertex in 0 until visitedDistanceInverses.size) {
+            if (iVertex == currentVertex) {
+                continue
+            }
+            val iVertexValue = value * exchangeRates[currentVertex][iVertex]
+            if (isUnvisited(iVertex)) {
+                val newValue = depthFirst(iVertex, iVertexValue)
                 if (found) {
                     return newValue
+                }
+            } else {
+                val newValue = iVertexValue * visitedDistanceInverses[iVertex]
+                if (newValue > 1.0) {
+                    found = true
+                    return value
                 }
             }
         }
@@ -37,14 +45,20 @@ class DynamicArbitrageFinder(val exchangeRates: Array<DoubleArray>, val legend: 
         return value
     }
 
-    fun visit(vertex: Int) {
-        visited[vertex] = true
+    private fun visit(vertex: Int, value: Double) {
+        visitedDistanceInverses[vertex] = 1.0 / value
         path.addLast(vertex)
     }
 
-    fun leave(vertex: Int) {
-        visited[vertex] = false
+    private fun leave(vertex: Int) {
+        visitedDistanceInverses[vertex] = UNVISITED
         path.removeLast()
+    }
+
+    private fun isUnvisited(vertex: Int): Boolean = visitedDistanceInverses[vertex] == UNVISITED
+
+    companion object {
+        const val UNVISITED = -1.0
     }
 }
 
