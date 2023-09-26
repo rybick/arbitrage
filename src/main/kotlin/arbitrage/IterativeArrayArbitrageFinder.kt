@@ -15,7 +15,11 @@ import java.lang.RuntimeException
  * That was the 1st idea. Looks like it's enough to do one iteration.
  *
  *
- * Time complexity: n^3 = m*log(m)
+ * (Worst) time complexity: n^4 = m^2 
+ *  - n^2 for iterating through the whole array
+ *  - *n for iterating trhough all throughVertices
+ *  - *n for bulding the path wheneved new solution is found (There is possibly a space for improvement here to do it in O(1)
+ *    and hence go down with the overall complexity to n^3 = m*log(m)
  * Space complexity: n^3 = m*log(m)
  *
  * n - number of currencies (vertices)
